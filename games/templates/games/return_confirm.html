@@ -1,0 +1,41 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  <title>Potwierdź zwrot</title>
+  <div class="shadow p-2 mb-4 bg-body rounded">
+    <div class="d-flex align-items-center">
+      <div>
+        <p>
+          <strong>Użytkownik:</strong> {{ game_rental.user }}
+        </p>
+        <p>
+          <strong>Nazwa gry:</strong> {{ game_rental.game_instance.game.name }}
+        </p>
+        <p>
+          <strong>ID Gry:</strong> {{ game_rental.game_instance.game.id }}
+        </p>
+        <p>
+          <strong>ID Egzemplarza:</strong> {{ game_rental.game_instance.id }}
+        </p>
+        <p>
+          <strong>ID Wypożyczenia:</strong> {{ game_rental.id }}
+        </p>
+        <p>
+          <strong>Data wypożyczenia:</strong> {{ game_rental.rental_date }}
+        </p>
+        <p>
+          <strong>Data zwrotu:</strong> {{ game_rental.return_date }}
+        </p>
+        <form method="POST">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">Potwierdź zwrot</button>
+        </form>
+      </div>
+      <div class="ms-auto">
+        <img src="{{ game_rental.game_instance.game.image.url }}" alt="{{ game_rental.game_instance.game.image.url }}" class="img-fluid custom-img" />
+      </div>
+    </div>
+  </div>
+{% endblock %}

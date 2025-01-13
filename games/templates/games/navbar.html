@@ -1,0 +1,28 @@
+<nav class="navbar navbar-expand-lg bg-body-tertiary">
+  <div class="container-fluid">
+    <a class="navbar-brand" href="/">Wypożyczalnia gier</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="navbar">
+      <div class="navbar-nav me-auto">
+        <a class="nav-link" aria-current="page" href="/">Główna</a>
+        {% if user.is_authenticated %}
+          <a class="nav-link" href="{% url 'user_rental' %}">Wypożyczenia</a>
+          <a class="nav-link" href="{% url 'user_reservation' %}">Rezerwacje</a>
+          <a class="nav-link" href="{% url 'notifications' %}">Powiadomienia</a>
+        {% endif %}
+      </div>
+      <div class="navbar-nav">
+        {% if user.is_authenticated %}
+          {% if user.is_superuser %}
+            <a class="nav-link" href="{% url 'all_rentals' %}">Wypożyczenia klientów</a>
+            <a class="nav-link" href="{% url 'admin:index' %}">Panel Admina</a>
+          {% endif %}
+          <a class="nav-link" href="{% url 'logout' %}">Wyloguj</a>
+        {% else %}
+          <a class="nav-link" href="{% url 'login' %}">Logowanie</a>
+          <a class="nav-link" href="{% url 'register' %}">Rejestracja</a>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</nav>

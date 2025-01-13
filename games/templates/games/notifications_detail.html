@@ -1,0 +1,10 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  <title>Powiadomienie :: {{ title }}</title>
+  <h3>{{ title }}</h3>
+  <p>{{ message|linebreaks }}</p>
+  <form method="POST">
+    {% csrf_token %}
+    <button type="submit" class="btn btn-danger">Usuń powiadomienie</button>
+  </form>
+{% endblock %}

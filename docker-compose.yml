@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:12.5
+    environment:
+      POSTGRES_DB: boardgamerental
+      POSTGRES_USER: boardgamerental
+      POSTGRES_PASSWORD: boardgamerentalpass
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U boardgamerental"]
+      interval : 5s
+      timeout : 5s
+      retries : 5
+    volumes:
+      - "./postgresql/data:/var/lib/postgresql/data"
+    ports:
+      - 5432:5432
+  web:
+    build: .
+    volumes:
+      - .:/code
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    ports:
+      - 8000:8000
+  celery-worker:
+    build: .
+    command: celery -A boardgamerental worker --loglevel=info --concurrency=1
+    volumes:
+      - .:/usr/src/boardgamerental
+    environment:
+      - DEBUG=1
+      - DJANGO_ALLOWED_HOSTS=localhost 127.0.0.1 [::1]
+      - CELERY_BROKER=redis://redis:6379/0
+      - CELERY_BACKEND=redis://redis:6379/0
+    depends_on:
+      - db
+      - redis
+      - celery-beat
+  celery-beat:
+    build: .
+    command: celery -A boardgamerental beat -l INFO
+    volumes:
+      - .:/usr/src/boardgamerental
+  redis:
+    image: "redis:alpine"

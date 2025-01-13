@@ -1,0 +1,67 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  {% if random_game != None and game_instance_count <= 0 and game_reservation_count > 0 %}
+    <div class="alert alert-warning" role="alert">
+      Brak dostępnych egzemplarzy! Niestety, wszystkie egzemplarze tej gry zostały wypożyczone.
+      <br />Polecamy wypożyczenie
+      <a href="{% url 'detail' random_game.name %}"><strong>{{ random_game.name }}</strong></a>
+      lub zarezerwowanie egzemplarza na najbliższy możliwy termin wybierając przycisk <strong>Zarezerwuj</strong>.
+    </div>
+  {% elif game_instance_count <= 0 and game_reservation_count > 0 %}
+    <div class="alert alert-warning" role="alert">
+      Brak dostępnych egzemplarzy! Niestety, wszystkie egzemplarze tej gry zostały wypożyczone. Zarezerwuj egzemplarz na najbliższy możliwy termin wybierając przycisk <strong>Zarezerwuj</strong>.
+    </div>
+  {% elif random_game != None and game_instance_count <= 0 and game_reservation_count <= 0 %}
+    <div class="alert alert-warning" role="alert">
+      Brak dostępnych egzemplarzy! Niestety, wszystkie egzemplarze tej gry zostały wypożyczone.
+      <br />Polecamy wypożyczenie
+      <a href="{% url 'detail' random_game.name %}"><strong>{{ random_game.name }}</strong>.</a>
+    </div>
+  {% endif %}
+  <div class="shadow p-4 mb-5 bg-body rounded">
+    <title>Szczegóły :: {{ game_name }}</title>
+    <h1>{{ game_name }}</h1>
+    <p>{{ game_description }}</p>
+    <p>
+      <strong>Dostępne egzemplarze:</strong> {{ game_instance_count }}
+    </p>
+    <p>
+      <strong>Dostępne rezerwacje:</strong> {{ game_reservation_count }}
+    </p>
+    <img src="{{ game_image }}" alt="{{ game_image }}" class="img-fluid custom-img" />
+    <br /><br />
+    <div class="d-flex justify-content-between">
+      <div class="d-flex">
+        {% if game_instance_count <= 0 %}
+          <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Brak dostępnych gier do wypożyczenia"><a href="{% url 'rental_info' game_name %}" class="btn btn-secondary disabled">Wypożycz</a></span>
+        {% else %}
+          <a href="{% url 'rental_info' game_name %}" class="btn btn-success">Wypożycz</a>
+        {% endif %}
+        <div class="button-gap"></div>
+        {% if game_reservation_count <= 0 %}
+          <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Brak dostępnych gier do zarezerwowania"><a href="{% url 'rental_info' game_name %}" class="btn btn-secondary disabled">Zarezerwuj</a></span>
+        {% else %}
+          {% if not is_game_reserved %}
+            <a href="{% url 'reservation_info' game_name %}" class="btn btn-primary">Zarezerwuj</a>
+          {% else %}
+            <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Ta gra została już przez ciebie zarezerwowana"><a href="{% url 'rental_info' game_name %}" class="btn btn-secondary disabled">Zarezerwuj</a></span>
+          {% endif %}
+        {% endif %}
+      </div>
+      {% if user.is_superuser %}
+        <form method="POST">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-primary">Dodaj egzemplarz</button>
+        </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+  </script>
+{% endblock %}

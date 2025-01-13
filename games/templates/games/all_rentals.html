@@ -1,0 +1,97 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  <div class="">
+    <div class="d-flex justify-content-between align-items-center">
+      <h3>Wypożyczone gry</h3>
+      {% if user.is_superuser %}
+        <div class="ms-auto mb-1">
+          <a href="{% url 'rental_report' %}" class="btn btn-primary">Raport wypożyczeń</a>
+          <a href="{% url 'reservation_report' %}" class="btn btn-primary">Raport rezerwacji</a>
+          <a href="{% url 'current_popular_games_report' %}" class="btn btn-primary">Raport aktualnie popularnych gier</a>
+          <a href="{% url 'all_time_popular_games_report' %}" class="btn btn-primary">Raport popularności gier wszech czasów</a>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+
+  <title>Wszystkie wypożyczenia</title>
+  {% if game_rental %}
+    {% for game in game_rental %}
+      <div class="shadow p-2 mb-4 bg-body rounded">
+        <div class="d-flex align-items-center">
+          <div>
+            <p>
+              <strong>Użytkownik:</strong> {{ game.user }}
+            </p>
+            <p>
+              <strong>Nazwa gry:</strong> {{ game.game_instance.game.name }}
+            </p>
+            <p>
+              <strong>ID Gry:</strong> {{ game.game_instance.game.id }}
+            </p>
+            <p>
+              <strong>ID Egzemplarza:</strong> {{ game.game_instance.id }}
+            </p>
+            <p>
+              <strong>ID Wypożyczenia:</strong> {{ game.id }}
+            </p>
+            <p>
+              <strong>Data wypożyczenia:</strong> {{ game.rental_date }}
+            </p>
+            <p>
+              <strong>Data zwrotu:</strong> {{ game.return_date }}
+            </p>
+            <p>
+              <strong>Pozostały czas do zwrotu:</strong> {{ game.return_date|timeuntil:game.rental_date }}
+            </p>
+            <form method="POST" action="{% url 'return_confirm' game.id %}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success">Potwierdź zwrot</button>
+            </form>
+          </div>
+          <div class="ms-auto">
+            <img src="{{ game.game_instance.game.image.url }}" alt="{{ game.game_instance.game.image.url }}" class="img-fluid custom-img" />
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if game_rental.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.previous_page_number }}">Poprzednia</a>
+          </li>
+        {% endif %}
+        {% for page in game_rental.paginator.page_range %}
+          {% if game_rental.has_other_pages %}
+            {% if game_rental.number == page %}
+              <li class="page-item active">
+                <span class="page-link">{{ page }}<span class="sr-only"></span></span>
+              </li>
+            {% elif page > game_rental.number|add:'-3' and page < game_rental.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if game_rental.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.next_page_number }}">Następna</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.paginator.num_pages }}">&raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% else %}
+    <p>Klienci nie posiadają wypożyczonych gier!</p>
+  {% endif %}
+{% endblock %}

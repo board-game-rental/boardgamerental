@@ -1,0 +1,93 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  <title>Rezerwacje :: {{ user }}</title>
+  <h3>Zarezerwowane gry</h3>
+  {% if game_reservation %}
+    {% for reservation in game_reservation %}
+      <div class="shadow p-2 mb-4 bg-body rounded">
+        <div class="d-flex align-items-center">
+          <div>
+            <p>
+              <strong>Nazwa gry:</strong> {{ reservation.game_instance.game.name }}
+            </p>
+            <p>
+              <strong>ID Gry:</strong> {{ reservation.game_instance.game.id }}
+            </p>
+            <p>
+              <strong>ID Egzemplarza:</strong> {{ reservation.game_instance.id }}
+            </p>
+            <p>
+              <strong>ID Rezerwacji:</strong> {{ reservation.id }}
+            </p>
+            <p>
+              <strong>Data rezerwacji:</strong> {{ reservation.reservation_date }}
+            </p>
+            <p>
+              <strong>Data końca rezerwacji:</strong> {{ reservation.reservation_end_date }}
+            </p>
+            <p>
+              <strong>Pozostały czas na wypożyczenie:</strong> {{ reservation.reservation_end_date|timeuntil:current_date }}
+            </p>
+          </div>
+          <div class="ms-auto">
+            <img src="{{ reservation.game_instance.game.image.url }}" alt="{{ reservation.game_instance.game.image.url }}" class="img-fluid custom-img" />
+          </div>
+        </div>
+        <div class="d-flex justify-content-between">
+          {% if reservation.game_instance.is_available %}
+            <a href="{% url 'reservation_rental_info' reservation.id %}" class="btn btn-success">Wypożycz</a>
+          {% else %}
+            <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Gra nie została jeszcze zwrócona"><a class="btn btn-secondary disabled">Wypożycz</a></span>
+          {% endif %}
+          <form method="POST" action="{% url 'user_reservation' %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger" name="reservation_id" value="{{ reservation.id }}">Anuluj rezerwację</button>
+          </form>
+        </div>
+      </div>
+    {% endfor %}
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if game_reservation.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_reservation.previous_page_number }}">Poprzednia</a>
+          </li>
+        {% endif %}
+        {% for page in game_reservation.paginator.page_range %}
+          {% if game_reservation.has_other_pages %}
+            {% if game_reservation.number == page %}
+              <li class="page-item active">
+                <span class="page-link">{{ page }}<span class="sr-only"></span></span>
+              </li>
+            {% elif page > game_reservation.number|add:'-3' and page < game_reservation.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if game_reservation.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_reservation.next_page_number }}">Następna</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_reservation.paginator.num_pages }}">&raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% else %}
+    <p>Brak zarezerwowanych gier!</p>
+  {% endif %}
+
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+  </script>
+{% endblock %}

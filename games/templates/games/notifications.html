@@ -1,0 +1,56 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  <title>Powiadomienia</title>
+  <h3>Powiadomienia</h3>
+  {% if notifications %}
+    <ul class="list-group">
+      {% for notification in notifications %}
+        <button type="button" class="list-group-item list-group-item-action" onclick="window.location.href='/notifications/{{ notification.id }}'">{{ notification.title }}</button>
+      {% endfor %}
+    </ul>
+    <br />
+    <div class="d-flex justify-content-between">
+      <nav aria-label="Page navigation">
+        <ul class="pagination">
+          {% if notifications.has_previous %}
+            <li class="page-item">
+              <a class="page-link" href="?page=1">&laquo</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ notifications.previous_page_number }}">Poprzednia</a>
+            </li>
+          {% endif %}
+          {% for page in notifications.paginator.page_range %}
+            {% if notifications.has_other_pages %}
+              {% if notifications.number == page %}
+                <li class="page-item active">
+                  <span class="page-link">{{ page }}<span class="sr-only"></span></span>
+                </li>
+              {% elif page > notifications.number|add:'-3' and page < notifications.number|add:'3' %}
+                <li class="page-item">
+                  <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+                </li>
+              {% endif %}
+            {% endif %}
+          {% endfor %}
+          {% if notifications.has_next %}
+            <li class="page-item">
+              <a class="page-link" href="?page={{ notifications.next_page_number }}">Następna</a>
+            </li>
+            <li class="page-item">
+              <a class="page-link" href="?page={{ notifications.paginator.num_pages }}">&raquo;</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+      {% if notifications.number == 1 %}
+        <form method="POST">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-danger">Usuń wszystkie powiadomienia</button>
+        </form>
+      {% endif %}
+    </div>
+  {% else %}
+    <p>Brak powiadomień!</p>
+  {% endif %}
+{% endblock %}

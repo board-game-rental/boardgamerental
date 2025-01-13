@@ -1,0 +1,36 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  <title>Wypożyczenie :: {{ game_name }}</title>
+  <div class="shadow p-5 mb-5 bg-body rounded">
+    <div class="d-flex align-items-center">
+      <div>
+        <h3>Szczegóły wypożyczenia</h3>
+        <p>
+          <strong>Nazwa gry:</strong> {{ game_name }}
+        </p>
+        <p>
+          <strong>ID Gry:</strong> {{ game_id }}
+        </p>
+        <p>
+          <strong>ID Egzemplarza:</strong> {{ game_instance }}
+        </p>
+        <p>
+          <strong>Data wypożyczenia:</strong> {{ current_date }}
+        </p>
+        <p>
+          <strong>Data zwrotu:</strong> {{ return_date }}
+        </p>
+        <form method="POST" action="{% url 'reservation_rental_confirm' reservation_id %}">
+          {% csrf_token %}
+          <button type="submit" class="btn btn-success">Potwierdź</button>
+        </form>
+      </div>
+      <div class="ms-auto">
+        <img src="{{ game_image }}" alt="{{ game_image }}" class="img-fluid custom-img" />
+      </div>
+    </div>
+  </div>
+{% endblock %}

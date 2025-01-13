@@ -1,0 +1,24 @@
+[tool.poetry]
+name = "boardgamerental"
+version = "0.1.0"
+description = ""
+authors = [
+    "Mateusz",
+    "Dawid"
+]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+django = "^4.2.1"
+psycopg2-binary = "^2.9.6"
+gunicorn = "^20.1.0"
+redis = "^4.6.0"
+celery = "^5.3.1"
+django-celery-results = "^2.5.1"
+django-celery-beat = "^2.5.0"
+qrcode = "^8.0"
+pillow = "^11.1.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"

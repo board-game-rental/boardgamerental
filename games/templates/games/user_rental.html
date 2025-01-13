@@ -1,0 +1,131 @@
+{% extends 'games/base.html' %}
+{% block content %}
+  {% load static %}
+  <link rel="stylesheet" href="{% static 'games/style.css' %}" />
+
+  <title>Wypożyczenia :: {{ user }}</title>
+  <h3>Wypożyczone gry</h3>
+  {% if game_rental %}
+    {% for game in game_rental %}
+      <div class="shadow p-2 mb-4 bg-body rounded">
+        <div class="d-flex align-items-center">
+          <div>
+            <p>
+              <strong>Nazwa gry:</strong> {{ game.game_instance.game.name }}
+            </p>
+            <p>
+              <strong>ID Gry:</strong> {{ game.game_instance.game.id }}
+            </p>
+            <p>
+              <strong>ID Egzemplarza:</strong> {{ game.game_instance.id }}
+            </p>
+            <p>
+              <strong>ID Wypożyczenia:</strong> {{ game.id }}
+            </p>
+            <p>
+              <strong>Data wypożyczenia:</strong> {{ game.rental_date }}
+            </p>
+            {% if game.game_instance.is_reserved %}
+              <p>
+                <strong>Data zwrotu:</strong> {{ game.return_date }}
+              </p>
+              <p>
+                <strong>Pozostały czas do zwrotu:</strong> {{ game.return_date|timeuntil:current_date }}
+              </p>
+              <div class="d-inline-flex gap-1">
+                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Gra została przez kogoś zarezerwowana"><button type="button" class="btn btn-secondary disabled">Przedłuż o 3 dni</button></span>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qrModal{{ game.id }}">Kod QR</button>
+              </div>
+            {% elif not game.is_extended %}
+              <p>
+                <strong>Data zwrotu:</strong> {{ game.return_date }}
+              </p>
+              <p>
+                <strong>Pozostały czas do zwrotu:</strong> {{ game.return_date|timeuntil:current_date }}
+              </p>
+              <div class="d-inline-flex gap-1">
+                <form method="POST" action="{% url 'extend_rental' game.id %}?page={{ game_rental.number }}">
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn-success">Przedłuż o 3 dni</button>
+                </form>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qrModal{{ game.id }}">Kod QR</button>
+              </div>
+            {% else %}
+              <p>
+                <strong>Data zwrotu (przedłużona):</strong> {{ game.return_date }}
+              </p>
+              <p>
+                <strong>Pozostały czas do zwrotu:</strong> {{ game.return_date|timeuntil:current_date }}
+              </p>
+              <div class="d-inline-flex gap-1">
+                <span class="d-inline-block" tabindex="0" data-bs-toggle="tooltip" data-bs-title="Wypożyczenie zostało już przedłużone"><button type="button" class="btn btn-secondary disabled">Przedłuż o 3 dni</button></span>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#qrModal{{ game.id }}">Kod QR</button>
+              </div>
+            {% endif %}
+          </div>
+          <div class="ms-auto">
+            <img src="{{ game.game_instance.game.image.url }}" alt="{{ game.game_instance.game.image.url }}" class="img-fluid custom-img" />
+          </div>
+        </div>
+      </div>
+
+      <!-- modal dla qr kodu -->
+      <div class="modal fade" id="qrModal{{ game.id }}" tabindex="-1" aria-labelledby="qrModalLabel{{ game.id }}" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" style="max-width: fit-content; width: auto;">
+          <div class="modal-content">
+            <div class="modal-header">
+              <h5 class="modal-title" id="qrModalLabel{{ game.id }}">Kod QR</h5>
+              <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-0" style="display: flex; justify-content: center; align-items: center;">
+              {% if game.qr_code_base64 %}
+                <img src="data:image/png;base64,{{ game.qr_code_base64 }}" alt="QR Code" class="img-fluid" style="max-width: 100%; height: auto;" />
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    {% endfor %}
+
+    <nav aria-label="Page navigation">
+      <ul class="pagination">
+        {% if game_rental.has_previous %}
+          <li class="page-item">
+            <a class="page-link" href="?page=1">&laquo</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.previous_page_number }}">Poprzednia</a>
+          </li>
+        {% endif %}
+        {% for page in game_rental.paginator.page_range %}
+          {% if game_rental.has_other_pages %}
+            {% if game_rental.number == page %}
+              <li class="page-item active">
+                <span class="page-link">{{ page }}<span class="sr-only"></span></span>
+              </li>
+            {% elif page > game_rental.number|add:'-3' and page < game_rental.number|add:'3' %}
+              <li class="page-item">
+                <a class="page-link" href="?page={{ page }}">{{ page }}</a>
+              </li>
+            {% endif %}
+          {% endif %}
+        {% endfor %}
+        {% if game_rental.has_next %}
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.next_page_number }}">Następna</a>
+          </li>
+          <li class="page-item">
+            <a class="page-link" href="?page={{ game_rental.paginator.num_pages }}">&raquo;</a>
+          </li>
+        {% endif %}
+      </ul>
+    </nav>
+  {% else %}
+    <p>Brak wypożyczonych gier!</p>
+  {% endif %}
+
+  <script>
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]')
+    const tooltipList = [...tooltipTriggerList].map((tooltipTriggerEl) => new bootstrap.Tooltip(tooltipTriggerEl))
+  </script>
+{% endblock %}
