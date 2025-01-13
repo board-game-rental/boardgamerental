@@ -58,7 +58,7 @@ Po wykonaniu powyższych kroków strona powinna już działać i być dostępna 
 
 1. Wejdź w tryb exec kontenera ze stroną
    ```sh
-   docker exec -it boardgamerental-local-web-1 /bin/bash
+   docker exec -it boardgamerental-web-1 /bin/bash
    ```
 2. Skopiuj pliki statyczne
    ```sh
