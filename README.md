@@ -64,7 +64,11 @@ Po wykonaniu powyższych kroków strona powinna już działać i być dostępna 
    ```sh
    python manage.py collectstatic --noinput
    ```
-Wykonanie powyższych kroków sprawi, że skopiowane zostaną pliki statyczne i strona będzie się wyświetlać poprawnie.
+3. Stwórz konto administratora
+   ```sh
+   python manage.py createsuperuser
+   ```
+Wykonanie powyższych kroków sprawi, że skopiowane zostaną pliki statyczne i strona będzie się wyświetlać poprawnie. Utworzenie konta administratora umożliwi zarządzanie stroną poprzez panel administracyjny.
 
 [django]: https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=green
 [django-url]: https://www.djangoproject.com/
